@@ -1,0 +1,1 @@
+torchrun --nproc-per-node=1 --nnodes=1 --rdzv_id=456 --rdzv-endpoint=localhost:12345 --rdzv-backend=c10d --node-rank=1 multinode.py 10 1 config.yaml
