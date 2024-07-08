@@ -48,7 +48,9 @@ class Trainer:
             print("Loading snapshot")
             self._load_snapshot(snapshot_path)
 
+
         self.model = DDP(self.model, device_ids=[self.local_rank])
+
 
     def _load_snapshot(self, snapshot_path):
         loc = f"cuda:{self.local_rank}"
@@ -113,11 +115,13 @@ def prepare_dataloader(dataset: Dataset, batch_size: int):
         batch_size=batch_size,
         pin_memory=True,
         shuffle=False,
-        num_workers=16,
+        num_workers=8,
         sampler=DistributedSampler(dataset)
     )
 
+from torch.distributed.elastic.multiprocessing.errors import record
 
+@record
 def main(save_every: int, 
          total_epochs: int, 
          batch_size: int, 
@@ -137,6 +141,7 @@ def main(save_every: int,
     train_data = prepare_dataloader(train_set, batch_size)
     test_data = prepare_dataloader(test_set, batch_size)
 
+
     trainer = Trainer(
         model=model,
         train_data=train_data,
@@ -154,7 +159,7 @@ def parse_args():
     parser.add_argument('total_epochs', type=int, help='Total epochs to train the model')
     parser.add_argument('save_every', type=int, help='How often to save a snapshot')
     parser.add_argument('config', type=str, help='Path to config')
-    parser.add_argument('--batch_size', default=16, type=int, help='Input batch size on each device (default: 32)')
+    parser.add_argument('--batch_size', default=52, type=int, help='Input batch size on each device (default: 32)')
     
     args = parser.parse_args()
 
