@@ -1,0 +1,24 @@
+version: '3.0'
+services:
+  multinode:
+    build: .
+    container_name: multinode
+    image: multinode
+    
+    network_mode: "host"
+    runtime: nvidia
+    shm_size: 32gb
+
+    environment:
+      - NCCL_SOCKET_IFNAME=enp3s0           # Name of communication interface
+      - NPROC_PER_NODE=1                    # Number of gpus on current machine
+      - NNODES=3                            # Number of machines
+      - NODE_RANK=0                         # Unique id for current machine
+      - RDZV_ENDPOINT=192.168.1.207:12345   # Address of host machine
+      - RDZV_ID=456                         # Random number 
+      - NCCL_PORT_RANGE=50000 51000         # Port range for nccl tcp connections
+
+    volumes:
+      - ./dataset:/workspace/dataset  # Path to dataset
+ 
+    entrypoint: entrypoint.sh

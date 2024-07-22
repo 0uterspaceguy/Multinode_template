@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+
 from dataset import Dataset
 from model import Model
 
@@ -8,13 +9,11 @@ import torch.multiprocessing as mp
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
+
 import os
-
 from tqdm import tqdm
-
 import argparse
 import yaml
-
 
 
 
@@ -66,8 +65,6 @@ class Trainer:
 
         targets = targets.type(torch.LongTensor).cuda()
 
-
-
         loss = self.criterion(output, targets)
         loss.backward()
         self.optimizer.step()
@@ -85,7 +82,7 @@ class Trainer:
     def _save_snapshot(self, epoch):
         snapshot = {
             "MODEL_STATE": self.model.module.state_dict(),
-            'OPTIMIZER_STATE': self.optimizer.state_dict(),
+            "OPTIMIZER_STATE": self.optimizer.state_dict(),
             "EPOCHS_RUN": epoch,
         }
         torch.save(snapshot, self.snapshot_path)
@@ -119,9 +116,6 @@ def prepare_dataloader(dataset: Dataset, batch_size: int):
         sampler=DistributedSampler(dataset)
     )
 
-from torch.distributed.elastic.multiprocessing.errors import record
-
-@record
 def main(save_every: int, 
          total_epochs: int, 
          batch_size: int, 
